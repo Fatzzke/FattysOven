@@ -1,0 +1,13 @@
+{
+  "itemGroup.fattysoven": "Example Mod Tab",
+  "block.fattysoven.example_block": "Example Block",
+  "item.fattysoven.example_item": "Example Item",
+
+  "fattysoven.configuration.title": "FattysOven Configs",
+  "fattysoven.configuration.section.fattysoven.common.toml": "FattysOven Configs",
+  "fattysoven.configuration.section.fattysoven.common.toml.title": "FattysOven Configs",
+  "fattysoven.configuration.items": "Item List",
+  "fattysoven.configuration.logDirtBlock": "Log Dirt Block",
+  "fattysoven.configuration.magicNumberIntroduction": "Magic Number Text",
+  "fattysoven.configuration.magicNumber": "Magic Number"
+}

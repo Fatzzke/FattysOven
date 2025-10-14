@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=east": {
+            "model": "fattysoven:block/oven_block",
+            "y": 90
+        },
+        "facing=north": {
+            "model": "fattysoven:block/oven_block"
+        },
+        "facing=south": {
+            "model": "fattysoven:block/oven_block",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "fattysoven:block/oven_block",
+            "y": 270
+        }
+    }
+}
