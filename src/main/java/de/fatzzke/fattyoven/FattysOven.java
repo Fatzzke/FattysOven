@@ -1,20 +1,26 @@
 package de.fatzzke.fattyoven;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
 import de.fatzzke.blocks.OvenBlock;
+import de.fatzzke.entities.OvenBlockEnity;
+import de.fatzzke.inventory.OvenInventory;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
@@ -25,6 +31,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -50,6 +57,11 @@ public class FattysOven {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister
             .create(Registries.CREATIVE_MODE_TAB, MODID);
 
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister
+            .create(Registries.BLOCK_ENTITY_TYPE, MODID);
+
+    public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(BuiltInRegistries.MENU, MODID);
+
     // Creates a new Block with the id "fattysoven:example_block", combining the
     // namespace and path
     public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block",
@@ -59,15 +71,22 @@ public class FattysOven {
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block",
             EXAMPLE_BLOCK);
 
-
     public static final DeferredBlock<OvenBlock> OVEN_BLOCK = BLOCKS.registerBlock(
             "oven_block",
             OvenBlock::new, // The factory that the properties will be passed into.
             BlockBehaviour.Properties.of().noOcclusion() // The properties to use.
     );
 
+        public static final Supplier<MenuType<OvenInventory>> OVEN_INVENTORY = CONTAINERS.register("oven_inventory", () -> IMenuTypeExtension.create(OvenInventory::new));
+
     public static final DeferredItem<BlockItem> OVEN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("oven_block",
             OVEN_BLOCK);
+
+    public static final Supplier<BlockEntityType<OvenBlockEnity>> OVEN_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "oven_block_entity",
+            () -> BlockEntityType.Builder.of(OvenBlockEnity::new, OVEN_BLOCK.get()).build(null));
+
+
 
 
     // Creates a new food item with the id "fattysoven:example_id", nutrition 1 and
@@ -95,7 +114,7 @@ public class FattysOven {
     // is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and
     // pass them in automatically.
-    public FattysOven(IEventBus modEventBus, ModContainer modContainer) {
+    public FattysOven(IEventBus modEventBus, ModContainer modContainer, Dist dist) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
@@ -105,6 +124,10 @@ public class FattysOven {
         ITEMS.register(modEventBus);
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
+
+        BLOCK_ENTITY_TYPES.register(modEventBus);
+
+        CONTAINERS.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (FattysOven)
@@ -119,6 +142,10 @@ public class FattysOven {
         // Register our mod's ModConfigSpec so that FML can create and load the config
         // file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+        if(dist.isClient()){
+                modEventBus.addListener(FattysOvenClient::setupMenus);
+        }
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
