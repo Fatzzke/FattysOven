@@ -117,7 +117,6 @@ public class OvenBlock extends Block implements EntityBlock {
         }
 
         return InteractionResult.CONSUME;
-
     }
 
 }

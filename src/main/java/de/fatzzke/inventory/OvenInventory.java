@@ -2,6 +2,8 @@ package de.fatzzke.inventory;
 
 import java.util.Objects;
 
+import com.mojang.logging.LogUtils;
+
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
 import net.minecraft.core.BlockPos;
@@ -28,10 +30,10 @@ public class OvenInventory extends AbstractContainerMenu {
     // Server Constructor
     public OvenInventory(int containerId, Inventory playerInv, BlockEntity blockEntity) {
         super(FattysOven.OVEN_INVENTORY.get(), containerId);
-        if(blockEntity instanceof OvenBlockEnity be) {
+        if (blockEntity instanceof OvenBlockEnity be) {
             this.ovenEntity = be;
         } else {
-            throw new IllegalStateException("Incorrect block entity class (%s) passed into ExampleMenu!"
+            throw new IllegalStateException("Incorrect block entity class (%s) passed into OvenInventory!"
                     .formatted(blockEntity.getClass().getCanonicalName()));
         }
 
@@ -42,30 +44,48 @@ public class OvenInventory extends AbstractContainerMenu {
         createBlockEntityInventory(be);
     }
 
-
     @Override
-    public ItemStack quickMoveStack(Player arg0, int arg1) {
-        return ItemStack.EMPTY;
+    public ItemStack quickMoveStack(Player player, int index) {
+        ItemStack stack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
+            ItemStack stack1 = slot.getItem();
+            stack = stack1.copy();
+            int size = this.ovenEntity.getContainerSize();
+            if (index < size) {
+                if (!moveItemStackTo(stack1, size, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!moveItemStackTo(stack1, 0, size, false)) {
+                return ItemStack.EMPTY;
+            }
+            if (stack1.isEmpty()) {
+                slot.set(ItemStack.EMPTY);
+                slot.onTake(player, stack);
+            } else {
+                slot.setChanged();
+            }
+        }
+        this.ovenEntity.setChanged();
+        return stack;
     }
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
-       // return stillValid(this.levelAccess, player, FattysOven.OVEN_BLOCK.get());
+        return stillValid(this.levelAccess, player, FattysOven.OVEN_BLOCK.get());
     }
 
-    
     private void createBlockEntityInventory(OvenBlockEnity be) {
-   
-            for (int row = 0; row < 3; row++) {
-                for (int column = 0; column < 9; column++) {
-                    addSlot(new SlotItemHandler(be.getInventory(),
-                            column + (row * 9),
-                            8 + (column * 18),
-                            18 + (row * 18)));
-                }
+        var itemHandler = be.getInventory();
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                addSlot(new SlotItemHandler(itemHandler,
+                        column + (row * 3),
+                        97 + (column * 18),
+                        20 + (row * 18)));
             }
-
+        }
+        addSlot(new SlotItemHandler(itemHandler, 9, 26, 38));
     }
 
     private void createPlayerInventory(Inventory playerInv) {
