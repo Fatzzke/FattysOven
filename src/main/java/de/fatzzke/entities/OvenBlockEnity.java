@@ -6,7 +6,9 @@ import com.mojang.logging.LogUtils;
 
 import de.fatzzke.fattyoven.FattysOven;
 import de.fatzzke.inventory.OvenInventory;
+import de.fatzzke.util.CustomEnergyStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class OvenBlockEnity extends BaseContainerBlockEntity {
@@ -29,7 +32,6 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
     // but whatever
     private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
     public int goldStorage = 0;
-    public int energyStorage = 220;
     public boolean isWorking = false;
     // i hope java pass it by reference
     private final ItemStackHandler itemHandler = new ItemStackHandler(this.items) {
@@ -39,14 +41,21 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
             OvenBlockEnity.this.setChanged();
         }
     };
+    public final CustomEnergyStorage energyStorage = new CustomEnergyStorage(10000, 1000, 0);
 
     public OvenBlockEnity(BlockPos pos, BlockState blockState) {
         super(FattysOven.OVEN_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T be) {
+
+        if (level == null || level.isClientSide())
+            return;
+
         OvenBlockEnity tile = (OvenBlockEnity) be;
+
         if (tile.isWorking) {
+            FattysOven.LOGGER.debug("c" + String.valueOf(tile.goldStorage));
             boolean stillWorking = false;
             for (var i = 0; i < SIZE - 1; i++) {
                 var item = tile.itemHandler.getStackInSlot(i);
@@ -57,7 +66,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
                 }
             }
             tile.consumeGold();
-            tile.goldStorage = tile.goldStorage < 0 ? 0: tile.goldStorage;
+            tile.goldStorage = tile.goldStorage < 0 ? 0 : tile.goldStorage;
             tile.isWorking = tile.hasResources() && stillWorking;
         }
     }
@@ -70,7 +79,6 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory) {
-        LogUtils.getLogger().debug("createMenu");
         return new OvenInventory(windowId, playerInventory, this);
     }
 
@@ -94,7 +102,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
     }
 
     private boolean hasResources() {
-        if (goldStorage > 0 && energyStorage > 0)
+        if (goldStorage > 0 && this.energyStorage.getEnergyStored() > 0)
             return true;
         return false;
     }
@@ -104,6 +112,8 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
         super.setChanged();
         consumeGold();
         isWorking = false;
+        FattysOven.LOGGER.debug("a" + String.valueOf(this.energyStorage.getEnergyStored()));
+        FattysOven.LOGGER.debug("b" + String.valueOf(this.goldStorage));
         if (!hasResources()) {
             return;
         }
@@ -141,4 +151,9 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
         var serializedInventory = tag.getCompound("oven_inventory");
         this.itemHandler.deserializeNBT(lookupProvider, serializedInventory);
     }
+
+    public IEnergyStorage getEnergyStorage(Direction facing) {
+        return this.energyStorage;
+    }
+
 }

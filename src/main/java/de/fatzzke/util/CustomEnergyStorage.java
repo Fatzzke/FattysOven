@@ -1,0 +1,23 @@
+package de.fatzzke.util;
+
+import net.neoforged.neoforge.energy.EnergyStorage;
+
+public class CustomEnergyStorage extends EnergyStorage {
+
+    public CustomEnergyStorage(int capacity, int maxReceive, int maxExtract) {
+        super(capacity, maxReceive, maxExtract);
+    }
+
+    public void changeEnergy(int amount) {
+
+        this.energy = this.energy + amount;
+
+        if (this.energy < 0)
+            this.energy = 0;
+
+        if (this.energy > this.capacity)
+            this.energy = this.capacity;
+
+    }
+
+}

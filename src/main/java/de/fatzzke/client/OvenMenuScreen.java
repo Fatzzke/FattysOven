@@ -41,8 +41,14 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
         drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, ovenEntity.goldStorage / 100);
-        drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71, ovenEntity.energyStorage / 100);
+        // drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
+        //         (ovenEntity.energyStorage.getEnergyStored() / ovenEntity.energyStorage.getMaxEnergyStored()) * 20);
+                drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
+               10);
         drawFeudel(guiGraphics);
+        // FattysOven.LOGGER.debug(String.valueOf(ovenEntity.energyStorage.getEnergyStored()));
+      //   FattysOven.LOGGER.debug(String.valueOf(ovenEntity.goldStorage));
+
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
@@ -65,13 +71,11 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     private void drawFeudel(GuiGraphics guiGraphics) {
         if (ovenEntity.isWorking) {
             if (System.currentTimeMillis() - startTime < 200) {
-                guiGraphics.blit(TEXTURE, this.leftPos + 35, this.topPos + 15, 196, 136, 60, 60);
-            }
-            else if(System.currentTimeMillis() - startTime < 400){
-                guiGraphics.blit(TEXTURE, this.leftPos + 35, this.topPos + 15, 196, 196, 60, 60);
-            }
-            else{
-                guiGraphics.blit(TEXTURE, this.leftPos + 35, this.topPos + 15, 196, 136, 60, 60);
+                guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
+            } else if (System.currentTimeMillis() - startTime < 400) {
+                guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 196, 60, 60);
+            } else {
+                guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
                 startTime = System.currentTimeMillis();
             }
         }
