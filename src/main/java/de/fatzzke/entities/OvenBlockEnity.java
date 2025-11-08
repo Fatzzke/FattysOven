@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -31,7 +32,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
     // thanks neoforge docu for that? no other mod extends BaseContainerBlockEntity
     // but whatever
     private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
-    public int goldStorage = 0;
+    private int goldStorage = 0;
     public boolean isWorking = false;
     // i hope java pass it by reference
     private final ItemStackHandler itemHandler = new ItemStackHandler(this.items) {
@@ -41,7 +42,32 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
             OvenBlockEnity.this.setChanged();
         }
     };
-    public final CustomEnergyStorage energyStorage = new CustomEnergyStorage(10000, 1000, 0);
+    private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(10000, 1000, 0);
+
+    public final ContainerData containerData = new ContainerData() {
+        @Override
+        public int get(int pIndex) {
+            return switch (pIndex) {
+                case 0 -> OvenBlockEnity.this.energyStorage.getEnergyStored();
+                case 1 -> OvenBlockEnity.this.energyStorage.getMaxEnergyStored();
+                case 2 -> OvenBlockEnity.this.goldStorage;
+                default -> throw new UnsupportedOperationException("Unexpected value: " + pIndex);
+            };
+        }
+
+        @Override
+        public void set(int pIndex, int pValue) {
+            switch (pIndex) {
+                case 0 -> OvenBlockEnity.this.energyStorage.changeEnergy(pValue);
+                case 2 -> OvenBlockEnity.this.goldStorage = pValue;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+    };
 
     public OvenBlockEnity(BlockPos pos, BlockState blockState) {
         super(FattysOven.OVEN_BLOCK_ENTITY.get(), pos, blockState);
@@ -49,13 +75,12 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T be) {
 
-        if (level == null || level.isClientSide())
+        if (level == null || level.isClientSide()) {
             return;
+        }
 
         OvenBlockEnity tile = (OvenBlockEnity) be;
-
         if (tile.isWorking) {
-            FattysOven.LOGGER.debug("c" + String.valueOf(tile.goldStorage));
             boolean stillWorking = false;
             for (var i = 0; i < SIZE - 1; i++) {
                 var item = tile.itemHandler.getStackInSlot(i);
@@ -68,6 +93,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
             tile.consumeGold();
             tile.goldStorage = tile.goldStorage < 0 ? 0 : tile.goldStorage;
             tile.isWorking = tile.hasResources() && stillWorking;
+            tile.sendUpdate();
         }
     }
 
@@ -79,7 +105,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory) {
-        return new OvenInventory(windowId, playerInventory, this);
+        return new OvenInventory(windowId, playerInventory, this, this.containerData);
     }
 
     @Override
@@ -112,8 +138,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
         super.setChanged();
         consumeGold();
         isWorking = false;
-        FattysOven.LOGGER.debug("a" + String.valueOf(this.energyStorage.getEnergyStored()));
-        FattysOven.LOGGER.debug("b" + String.valueOf(this.goldStorage));
+        FattysOven.LOGGER.debug("a" + String.valueOf(this.containerData.get(2)));
         if (!hasResources()) {
             return;
         }
@@ -154,6 +179,11 @@ public class OvenBlockEnity extends BaseContainerBlockEntity {
 
     public IEnergyStorage getEnergyStorage(Direction facing) {
         return this.energyStorage;
+    }
+
+    private void sendUpdate() {
+        if (this.level != null){
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);}
     }
 
 }

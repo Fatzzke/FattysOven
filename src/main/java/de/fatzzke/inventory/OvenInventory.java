@@ -11,8 +11,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,14 +23,15 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 public class OvenInventory extends AbstractContainerMenu {
     public final OvenBlockEnity ovenEntity;
     private final ContainerLevelAccess levelAccess;
+    public final ContainerData data;
 
     // Client Constructor
     public OvenInventory(int containerId, Inventory playerInv, FriendlyByteBuf additionalData) {
-        this(containerId, playerInv, playerInv.player.level().getBlockEntity(additionalData.readBlockPos()));
+      this(containerId, playerInv, playerInv.player.level().getBlockEntity(additionalData.readBlockPos()), new SimpleContainerData(3));
     }
 
     // Server Constructor
-    public OvenInventory(int containerId, Inventory playerInv, BlockEntity blockEntity) {
+    public OvenInventory(int containerId, Inventory playerInv, BlockEntity blockEntity, ContainerData data) {
         super(FattysOven.OVEN_INVENTORY.get(), containerId);
         if (blockEntity instanceof OvenBlockEnity be) {
             this.ovenEntity = be;
@@ -38,10 +41,13 @@ public class OvenInventory extends AbstractContainerMenu {
         }
 
         this.levelAccess = ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos());
+        this.data = data;
 
         createPlayerHotbar(playerInv);
         createPlayerInventory(playerInv);
         createBlockEntityInventory(be);
+
+        addDataSlots(data);
     }
 
     @Override

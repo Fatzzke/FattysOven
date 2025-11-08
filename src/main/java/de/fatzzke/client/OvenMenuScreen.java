@@ -40,15 +40,11 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
-        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, ovenEntity.goldStorage / 100);
-        // drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
-        //         (ovenEntity.energyStorage.getEnergyStored() / ovenEntity.energyStorage.getMaxEnergyStored()) * 20);
-                drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
-               10);
-        drawFeudel(guiGraphics);
-        // FattysOven.LOGGER.debug(String.valueOf(ovenEntity.energyStorage.getEnergyStored()));
-      //   FattysOven.LOGGER.debug(String.valueOf(ovenEntity.goldStorage));
+        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, ovenEntity.containerData.get(2) / 100);
+        drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
+                (ovenEntity.containerData.get(0)) * 10 / ovenEntity.containerData.get(1));
 
+        drawFeudel(guiGraphics);
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
