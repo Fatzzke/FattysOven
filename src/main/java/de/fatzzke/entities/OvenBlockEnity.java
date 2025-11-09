@@ -20,6 +20,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,21 +53,25 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
                 case 0 -> OvenBlockEnity.this.energyStorage.getEnergyStored();
                 case 1 -> OvenBlockEnity.this.energyStorage.getMaxEnergyStored();
                 case 2 -> OvenBlockEnity.this.goldStorage;
+                case 3 -> OvenBlockEnity.this.isWorking();
                 default -> throw new UnsupportedOperationException("Unexpected value: " + pIndex);
             };
         }
 
         @Override
         public void set(int pIndex, int pValue) {
+            FattysOven.LOGGER.debug("B" + String.valueOf(pValue));
             switch (pIndex) {
                 case 0 -> OvenBlockEnity.this.energyStorage.changeEnergy(pValue);
                 case 2 -> OvenBlockEnity.this.goldStorage = pValue;
+                case 3 -> OvenBlockEnity.this.isWorking = pValue == 0 ? false : true;
             }
+
         }
 
         @Override
         public int getCount() {
-            return 3;
+            return 4;
         }
     };
 
@@ -92,7 +97,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
             this.consumeGold();
             this.goldStorage = this.goldStorage < 0 ? 0 : this.goldStorage;
             this.isWorking = this.hasResources() && stillWorking;
-            this.sendUpdate();
+            // this.sendUpdate();
         }
     }
 
@@ -137,7 +142,6 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
         super.setChanged();
         consumeGold();
         isWorking = false;
-        FattysOven.LOGGER.debug("a" + String.valueOf(this.containerData.get(2)));
         if (!hasResources()) {
             return;
         }
@@ -192,9 +196,14 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     }
 
     private void sendUpdate() {
+        FattysOven.LOGGER.debug("sendUpdate");
         if (this.level != null) {
-            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
+    }
+
+    private int isWorking() {
+        return this.isWorking ? 1 : 0;
     }
 
 }

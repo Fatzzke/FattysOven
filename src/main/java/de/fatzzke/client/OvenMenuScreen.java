@@ -36,25 +36,25 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        FattysOven.LOGGER.debug(String.valueOf(this.menu.data.get(0)));
         renderTooltip(guiGraphics, mouseX, mouseY);
         drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 100);
         drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
                 (this.menu.data.get(0)) * 10 / this.menu.data.get(1));
 
         drawFeudel(guiGraphics);
+        
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
         switch (type) {
             case 0:
                 for (int i = 0; i < count; i++) {
-                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 177, 0, 7, 2);
+                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 0, 7, 2);
                 }
                 break;
             case 1:
                 for (int i = 0; i < count; i++) {
-                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 177, 2, 7, 2);
+                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 2, 7, 2);
                 }
                 break;
             default:
@@ -63,7 +63,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     }
 
     private void drawFeudel(GuiGraphics guiGraphics) {
-        if (this.menu.ovenEntity.isWorking) {
+        if (this.menu.data.get(3) != 0) {
             if (System.currentTimeMillis() - startTime < 200) {
                 guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
             } else if (System.currentTimeMillis() - startTime < 400) {

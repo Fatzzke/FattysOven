@@ -9,6 +9,7 @@ import com.mojang.logging.LogUtils;
 import de.fatzzke.blocks.OvenBlock;
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.inventory.OvenInventory;
+import de.fatzzke.items.UpgradeSticker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -90,11 +91,8 @@ public class FattysOven {
                         "oven_block_entity",
                         () -> BlockEntityType.Builder.of(OvenBlockEnity::new, OVEN_BLOCK.get()).build(null));
 
-        // Creates a new food item with the id "fattysoven:example_id", nutrition 1 and
-        // saturation 2
-        public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item",
-                        new Item.Properties().food(new FoodProperties.Builder()
-                                        .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
+
+        public static final DeferredItem<UpgradeSticker> UPGRADE_ITEM = ITEMS.register("upgrade_sticker", () -> new UpgradeSticker(new Item.Properties()));
 
         // Creates a creative tab with the id "fattysoven:example_tab" for the example
         // item, that is placed after the combat tab
@@ -104,9 +102,9 @@ public class FattysOven {
                                                                                                // the title of your
                                                                                                // CreativeModeTab
                                         .withTabsBefore(CreativeModeTabs.COMBAT)
-                                        .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
+                                        .icon(() -> UPGRADE_ITEM.get().getDefaultInstance())
                                         .displayItems((parameters, output) -> {
-                                                output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab.
+                                                output.accept(UPGRADE_ITEM.get()); // Add the example item to the tab.
                                                                                    // For your own tabs, this
                                                                                    // method is preferred over the event
                                                 output.accept(OVEN_BLOCK_ITEM.get());
