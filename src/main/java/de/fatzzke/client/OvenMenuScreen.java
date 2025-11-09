@@ -19,14 +19,11 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(FattysOven.MODID,
             "textures/gui/oven_inventory.png");
     private long startTime = System.currentTimeMillis();
-    private OvenBlockEnity ovenEntity;
 
     public OvenMenuScreen(OvenInventory menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
         this.imageHeight = 166;
-        ovenEntity = menu.ovenEntity;
-
     }
 
     @Override
@@ -39,10 +36,11 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        FattysOven.LOGGER.debug(String.valueOf(this.menu.data.get(0)));
         renderTooltip(guiGraphics, mouseX, mouseY);
-        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, ovenEntity.containerData.get(2) / 100);
+        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 100);
         drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
-                (ovenEntity.containerData.get(0)) * 10 / ovenEntity.containerData.get(1));
+                (this.menu.data.get(0)) * 10 / this.menu.data.get(1));
 
         drawFeudel(guiGraphics);
     }
@@ -65,7 +63,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     }
 
     private void drawFeudel(GuiGraphics guiGraphics) {
-        if (ovenEntity.isWorking) {
+        if (this.menu.ovenEntity.isWorking) {
             if (System.currentTimeMillis() - startTime < 200) {
                 guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
             } else if (System.currentTimeMillis() - startTime < 400) {

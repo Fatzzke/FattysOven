@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
+import de.fatzzke.util.TickableBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -96,7 +97,7 @@ public class OvenBlock extends Block implements EntityBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
             BlockEntityType<T> type) {
-        return type == FattysOven.OVEN_BLOCK_ENTITY.get() ? (BlockEntityTicker<T>) OvenBlockEnity::tick : null;
+        return TickableBlockEntity.getTickerHelper(level);
     }
 
     @Override
