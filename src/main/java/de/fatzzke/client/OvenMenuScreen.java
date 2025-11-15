@@ -23,7 +23,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float arg1, int arg2, int arg3) {
+    protected void renderBg(@Nonnull GuiGraphics guiGraphics, float arg1, int arg2, int arg3) {
         renderTransparentBackground(guiGraphics);
         guiGraphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
@@ -32,7 +32,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
-        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 100);
+        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 1000);
         drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
                 ((this.menu.data.get(0))) * 10 / (this.menu.data.get(1) == 0 ? 10000 : this.menu.data.get(1))); // this.menu.data.get(1)
                                                                                                                 // sometimes
@@ -46,7 +46,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    protected void renderLabels(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         guiGraphics.drawString(font, "FE/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedEnergyPerTick()), 8, 70, 0xff00ff);
     }
 

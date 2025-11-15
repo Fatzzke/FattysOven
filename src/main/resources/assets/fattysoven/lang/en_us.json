@@ -1,7 +1,16 @@
 {
-  "itemGroup.fattysoven": "Example Mod Tab",
-  "block.fattysoven.example_block": "Example Block",
-  "item.fattysoven.example_item": "Example Item",
+  "itemGroup.fattysoven": "Fattys Oven Tab",
+  "block.fattysoven.oven_block": "Fattys Oven",
+
+  "item.fattysoven.upgrade_sticker": "Upgrade Sticker",
+  "item.fattysoven.gold_sticker": "Gold Sticker",
+  "item.fattysoven.energy_sticker": "Energy Sticker",
+  "item.fattysoven.upgradiger_sticker": "Upgradiger Sticker",
+
+  "tooltip.fattysoven.upgrade_sticker": "2x Everything",
+  "tooltip.fattysoven.gold_sticker": "4x Gold Usage; 0.5 Energy Usage",
+  "tooltip.fattysoven.energy_sticker": "4x Energy Usage; 0.5 Gold Usage",
+  "tooltip.fattysoven.upgradiger_sticker": "4x Everything",
 
   "fattysoven.configuration.title": "FattysOven Configs",
   "fattysoven.configuration.section.fattysoven.common.toml": "FattysOven Configs",

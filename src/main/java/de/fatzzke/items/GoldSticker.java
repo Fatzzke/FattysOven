@@ -9,9 +9,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
-public class UpgradeSticker extends Item {
+public class GoldSticker extends Item {
 
-    public UpgradeSticker(Properties properties) {
+    public GoldSticker(Properties properties) {
         super(properties);
     }
 
@@ -19,6 +19,6 @@ public class UpgradeSticker extends Item {
     public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
             @Nonnull List<Component> tooltipComponents,
             @Nonnull TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("tooltip.fattysoven.upgradiger_sticker").withStyle(ChatFormatting.BLUE));
+        tooltipComponents.add(Component.translatable("tooltip.fattysoven.gold_sticker").withStyle(ChatFormatting.BLUE));
     }
 }

@@ -9,7 +9,10 @@ import com.mojang.logging.LogUtils;
 import de.fatzzke.blocks.OvenBlock;
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.inventory.OvenInventory;
+import de.fatzzke.items.EnergySticker;
+import de.fatzzke.items.GoldSticker;
 import de.fatzzke.items.UpgradeSticker;
+import de.fatzzke.items.UpgradigerSticker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -64,15 +67,6 @@ public class FattysOven {
         public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(BuiltInRegistries.MENU,
                         MODID);
 
-        // Creates a new Block with the id "fattysoven:example_block", combining the
-        // namespace and path
-        public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block",
-                        BlockBehaviour.Properties.of().mapColor(MapColor.STONE));
-        // Creates a new BlockItem with the id "fattysoven:example_block", combining the
-        // namespace and path
-        public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block",
-                        EXAMPLE_BLOCK);
-
         public static final DeferredBlock<OvenBlock> OVEN_BLOCK = BLOCKS.registerBlock(
                         "oven_block",
                         OvenBlock::new, // The factory that the properties will be passed into.
@@ -89,8 +83,17 @@ public class FattysOven {
                         "oven_block_entity",
                         () -> BlockEntityType.Builder.of(OvenBlockEnity::new, OVEN_BLOCK.get()).build(null));
 
+        public static final DeferredItem<UpgradeSticker> UPGRADE_ITEM = ITEMS.register("upgrade_sticker",
+                        () -> new UpgradeSticker(new Item.Properties().stacksTo(1)));
 
-        public static final DeferredItem<UpgradeSticker> UPGRADE_ITEM = ITEMS.register("upgrade_sticker", () -> new UpgradeSticker(new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<GoldSticker> GOLD_ITEM = ITEMS.register("gold_sticker",
+                        () -> new GoldSticker(new Item.Properties().stacksTo(1)));
+
+        public static final DeferredItem<EnergySticker> ENERGY_ITEM = ITEMS.register("energy_sticker",
+                        () -> new EnergySticker(new Item.Properties().stacksTo(1)));
+
+        public static final DeferredItem<UpgradigerSticker> UPGRADIGER_ITEM = ITEMS.register("upgradiger_sticker",
+                        () -> new UpgradigerSticker(new Item.Properties().stacksTo(1)));
 
         // Creates a creative tab with the id "fattysoven:example_tab" for the example
         // item, that is placed after the combat tab
@@ -102,11 +105,14 @@ public class FattysOven {
                                         .withTabsBefore(CreativeModeTabs.COMBAT)
                                         .icon(() -> UPGRADE_ITEM.get().getDefaultInstance())
                                         .displayItems((parameters, output) -> {
-                                                output.accept(UPGRADE_ITEM.get()); // Add the example item to the tab.
-                                                                                   // For your own tabs, this
-                                                                                   // method is preferred over the event
+                                                // Add the example item to the tab.
+                                                // For your own tabs, this
+                                                // method is preferred over the event
                                                 output.accept(OVEN_BLOCK_ITEM.get());
-                                                output.accept(EXAMPLE_BLOCK_ITEM.get());
+                                                output.accept(UPGRADE_ITEM.get());
+                                                output.accept(GOLD_ITEM.get());
+                                                output.accept(ENERGY_ITEM.get());
+                                                output.accept(UPGRADIGER_ITEM.get());
                                         }).build());
 
         // The constructor for the mod class is the first code that is run when your mod
@@ -127,7 +133,6 @@ public class FattysOven {
                 BLOCK_ENTITY_TYPES.register(modEventBus);
 
                 CONTAINERS.register(modEventBus);
-
 
                 // Register ourselves for server and other game events we are interested in.
                 // Note that this is necessary if and only if we want *this* class (FattysOven)
@@ -159,14 +164,15 @@ public class FattysOven {
         // Add the example block item to the building blocks tab
         private void addCreative(BuildCreativeModeTabContentsEvent event) {
                 if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-                        event.accept(EXAMPLE_BLOCK_ITEM);
                         event.accept(OVEN_BLOCK_ITEM);
                 }
         }
 
-        private void addCapabilities(RegisterCapabilitiesEvent event){
-               event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, OVEN_BLOCK_ENTITY.get(), (myBlockEntity, side) -> myBlockEntity.getEnergyStorage(side));
-               event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, OVEN_BLOCK_ENTITY.get(), (myBlockEntity, side) -> myBlockEntity.getInventory());
+        private void addCapabilities(RegisterCapabilitiesEvent event) {
+                event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, OVEN_BLOCK_ENTITY.get(),
+                                (myBlockEntity, side) -> myBlockEntity.getEnergyStorage(side));
+                event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, OVEN_BLOCK_ENTITY.get(),
+                                (myBlockEntity, side) -> myBlockEntity.getInventory());
         }
 
         // You can use SubscribeEvent and let the Event Bus discover methods to call

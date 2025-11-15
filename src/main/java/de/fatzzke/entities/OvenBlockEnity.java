@@ -1,5 +1,6 @@
 package de.fatzzke.entities;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.fatzzke.fattyoven.FattysOven;
@@ -9,7 +10,6 @@ import de.fatzzke.util.TickableBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -33,6 +33,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     // thanks neoforge docu for that? no other mod extends BaseContainerBlockEntity
     // but whatever
     private int goldStorage = 0;
+    private int maxgoldStorage = 10000;
     private int baseGoldPerTick = 50;
     private int baseEnergyPerTick = 200;
     private int baseRepairPerTick = 1;
@@ -40,7 +41,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     private int calculatedEnergyPerTick = 200;
     private int calculateRepairPerTick = 200;
     public boolean isWorking = false;
-    // i hope java pass it by reference
+
     private final ItemStackHandler itemHandler = new ItemStackHandler(SIZE) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -49,19 +50,19 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
         }
 
         @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (stack.is(Items.GOLD_INGOT)) {
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            FattysOven.LOGGER.debug("A");
+            // 3x3 slot
+            if (slot < 9 && !stack.is(Items.GOLD_INGOT)) {
                 return super.insertItem(slot, stack, simulate);
             }
+            // gold slot
+            if (slot == 9 && stack.is(Items.GOLD_INGOT)) {
+                return super.insertItem(slot, stack, simulate);
+            }
+            // other slots dont insert
             return stack;
         }
-
-        @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            FattysOven.LOGGER.debug("a");
-            return super.extractItem(slot, amount, simulate);
-        }
-
     };
     private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(20000, 1000, 0);
 
@@ -111,7 +112,6 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
                     stillWorking = item.isDamaged() ? true : stillWorking;
                     goldStorage -= calculatedGoldPerTick;
                     energyStorage.changeEnergy(-calculatedEnergyPerTick);
-                    FattysOven.LOGGER.debug(String.valueOf(energyStorage.getEnergyStored()));
                 }
             }
             consumeGold();
@@ -156,14 +156,17 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
     protected void consumeGold() {
         var itemStack = itemHandler.getStackInSlot(9);
-        if (goldStorage <= 1 && itemStack.is(Items.GOLD_INGOT)) {
+        if (goldStorage <= 9000 && itemStack.is(Items.GOLD_INGOT)) {
             itemStack.shrink(1);
-            goldStorage = 1000;
+            goldStorage += 1000;
+        } else if (goldStorage <= 1000 && itemStack.is(Items.GOLD_BLOCK)) {
+            itemStack.shrink(1);
+            goldStorage += 9000;
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider lookupProvider) {
         super.saveAdditional(tag, lookupProvider);
 
         var tagData = new CompoundTag();
@@ -175,7 +178,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider lookupProvider) {
         super.loadAdditional(tag, lookupProvider);
 
         var tagData = tag.getCompound("oven_data");
@@ -202,16 +205,32 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     private void calculateStats() {
-        int mult = 1;
+        FattysOven.LOGGER.debug("calcStats");
+        int repairMult = 1, energyMult = 1, goldMult = 1, storeMult = 1;
         for (int i = 0; i < 4; i++) {
-            mult *= itemHandler.getStackInSlot(10 + i).is(FattysOven.UPGRADE_ITEM) ? 2 : 1;
-        }
+            var stack = itemHandler.getStackInSlot(10 + i);
+            if (stack.is(FattysOven.UPGRADE_ITEM)) {
+                repairMult *= 2;
+                energyMult *= 2;
+                goldMult *= 2;
+                storeMult *= 2;
+            } else if (stack.is(FattysOven.GOLD_ITEM)) {
 
-        calculateRepairPerTick = baseRepairPerTick * mult;
-        calculatedEnergyPerTick = baseEnergyPerTick * mult;
-        calculatedGoldPerTick = baseGoldPerTick * mult;
-        energyStorage.setCapacity(10000 * mult);
-        energyStorage.setMaxRecieve(1000 * mult);
+            } else if (stack.is(FattysOven.ENERGY_ITEM)) {
+
+            } else if (stack.is(FattysOven.UPGRADIGER_ITEM)) {
+                repairMult *= 4;
+                energyMult *= 4;
+                goldMult *= 4;
+                storeMult *= 4;
+            }
+
+        }
+        calculateRepairPerTick = baseRepairPerTick * repairMult;
+        calculatedEnergyPerTick = baseEnergyPerTick * energyMult;
+        calculatedGoldPerTick = baseGoldPerTick * goldMult;
+        energyStorage.setCapacity(10000 * storeMult);
+        energyStorage.setMaxRecieve(1000 * storeMult);
     }
 
     public int getCalculatedEnergyPerTick() {
@@ -220,7 +239,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
     @Override
     @Nullable
-    public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(int windowId, @Nonnull Inventory playerInventory, @Nonnull Player player) {
         return new OvenInventory(windowId, playerInventory, this, containerData);
     }
 

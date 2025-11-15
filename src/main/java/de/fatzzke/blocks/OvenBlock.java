@@ -2,10 +2,8 @@ package de.fatzzke.blocks;
 
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.mojang.logging.LogUtils;
-
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
 import de.fatzzke.util.TickableBlockEntity;
@@ -13,8 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -56,7 +52,8 @@ public class OvenBlock extends Block implements EntityBlock {
 
     // therese gotta be a better way
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(@Nonnull BlockState state, @Nonnull BlockGetter worldIn, @Nonnull BlockPos pos,
+            @Nonnull CollisionContext context) {
         switch (state.getValue(HORIZONTAL_FACING)) {
             case EAST:
                 return OVEN_SHAPE[0];
@@ -78,31 +75,31 @@ public class OvenBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
+    public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
         return defaultBlockState().setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(@Nonnull StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(HORIZONTAL_FACING);
     }
 
     @Override
     @Nullable
-    public BlockEntity newBlockEntity(BlockPos arg0, BlockState arg1) {
+    public BlockEntity newBlockEntity(@Nonnull BlockPos arg0, @Nonnull BlockState arg1) {
         return FattysOven.OVEN_BLOCK_ENTITY.get().create(arg0, arg1);
     }
 
-    @SuppressWarnings("unchecked") // Due to generics, an unchecked cast is necessary here.
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
-            BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level level, @Nonnull BlockState state,
+            @Nonnull BlockEntityType<T> type) {
         return TickableBlockEntity.getTickerHelper(level);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState pState, Level world, BlockPos pos, Player player,
-            BlockHitResult pHitResult) {
+    protected InteractionResult useWithoutItem(@Nonnull BlockState pState, @Nonnull Level world, @Nonnull BlockPos pos,
+            @Nonnull Player player,
+            @Nonnull BlockHitResult pHitResult) {
 
         BlockEntity be = world.getBlockEntity(pos);
         if (!(be instanceof OvenBlockEnity blockEnity)) {

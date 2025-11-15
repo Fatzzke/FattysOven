@@ -1,6 +1,8 @@
 package de.fatzzke.inventory;
 
 
+import javax.annotation.Nonnull;
+
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
 import net.minecraft.network.FriendlyByteBuf;
@@ -47,7 +49,7 @@ public class OvenInventory extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {
+    public ItemStack quickMoveStack(@Nonnull Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
@@ -74,7 +76,7 @@ public class OvenInventory extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(@Nonnull Player player) {
         return stillValid(this.levelAccess, player, FattysOven.OVEN_BLOCK.get());
     }
 
