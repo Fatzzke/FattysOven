@@ -12,24 +12,26 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
-public class OvenBlockEnity extends BaseContainerBlockEntity implements TickableBlockEntity {
+public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, MenuProvider {
 
     public static final int SIZE = 14;
 
     // thanks neoforge docu for that? no other mod extends BaseContainerBlockEntity
     // but whatever
-    private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
     private int goldStorage = 0;
     private int baseGoldPerTick = 50;
     private int baseEnergyPerTick = 200;
@@ -39,7 +41,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     private int calculateRepairPerTick = 200;
     public boolean isWorking = false;
     // i hope java pass it by reference
-    private final ItemStackHandler itemHandler = new ItemStackHandler(items) {
+    private final ItemStackHandler itemHandler = new ItemStackHandler(SIZE) {
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
@@ -47,13 +49,17 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
         }
 
         @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate){
-            if(stack.is(Items.GOLD_INGOT)){
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (stack.is(Items.GOLD_INGOT)) {
                 return super.insertItem(slot, stack, simulate);
             }
+            return stack;
+        }
 
-            return ItemStack.EMPTY;
-           
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            FattysOven.LOGGER.debug("a");
+            return super.extractItem(slot, amount, simulate);
         }
 
     };
@@ -113,32 +119,6 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
             isWorking = hasResources() && stillWorking;
             // sendUpdate();
         }
-    }
-
-    @Override
-    public int getContainerSize() {
-        return SIZE;
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory) {
-        return new OvenInventory(windowId, playerInventory, this, containerData);
-    }
-
-    @Override
-    protected Component getDefaultName() {
-        return Component.translatable("fattysoven.ovenentity");
-    }
-
-    @Override
-    protected NonNullList<ItemStack> getItems() {
-        return items;
-    }
-
-    @Override
-    protected void setItems(NonNullList<ItemStack> items) {
-        this.items = items;
     }
 
     public ItemStackHandler getInventory() {
@@ -236,5 +216,16 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
 
     public int getCalculatedEnergyPerTick() {
         return calculatedEnergyPerTick;
+    }
+
+    @Override
+    @Nullable
+    public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
+        return new OvenInventory(windowId, playerInventory, this, containerData);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("fattysoven.ovenentity");
     }
 }
