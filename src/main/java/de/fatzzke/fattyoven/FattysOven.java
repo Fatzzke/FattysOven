@@ -13,14 +13,12 @@ import de.fatzzke.items.UpgradeSticker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -92,7 +90,7 @@ public class FattysOven {
                         () -> BlockEntityType.Builder.of(OvenBlockEnity::new, OVEN_BLOCK.get()).build(null));
 
 
-        public static final DeferredItem<UpgradeSticker> UPGRADE_ITEM = ITEMS.register("upgrade_sticker", () -> new UpgradeSticker(new Item.Properties()));
+        public static final DeferredItem<UpgradeSticker> UPGRADE_ITEM = ITEMS.register("upgrade_sticker", () -> new UpgradeSticker(new Item.Properties().stacksTo(1)));
 
         // Creates a creative tab with the id "fattysoven:example_tab" for the example
         // item, that is placed after the combat tab
@@ -156,13 +154,6 @@ public class FattysOven {
                 // Some common setup code
                 LOGGER.info("HELLO FROM COMMON SETUP!");
 
-                if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
-                        LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-                }
-
-                LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
-
-                Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
         }
 
         // Add the example block item to the building blocks tab
@@ -175,6 +166,7 @@ public class FattysOven {
 
         private void addCapabilities(RegisterCapabilitiesEvent event){
                event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, OVEN_BLOCK_ENTITY.get(), (myBlockEntity, side) -> myBlockEntity.getEnergyStorage(side));
+               event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, OVEN_BLOCK_ENTITY.get(), (myBlockEntity, side) -> myBlockEntity.getInventory());
         }
 
         // You can use SubscribeEvent and let the Event Bus discover methods to call

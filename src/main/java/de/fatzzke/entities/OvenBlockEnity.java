@@ -2,8 +2,6 @@ package de.fatzzke.entities;
 
 import javax.annotation.Nullable;
 
-import com.mojang.logging.LogUtils;
-
 import de.fatzzke.fattyoven.FattysOven;
 import de.fatzzke.inventory.OvenInventory;
 import de.fatzzke.util.CustomEnergyStorage;
@@ -19,32 +17,47 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class OvenBlockEnity extends BaseContainerBlockEntity implements TickableBlockEntity {
 
-    public static final int SIZE = 10;
+    public static final int SIZE = 14;
 
     // thanks neoforge docu for that? no other mod extends BaseContainerBlockEntity
     // but whatever
     private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
     private int goldStorage = 0;
+    private int baseGoldPerTick = 50;
+    private int baseEnergyPerTick = 200;
+    private int baseRepairPerTick = 1;
+    private int calculatedGoldPerTick = 50;
+    private int calculatedEnergyPerTick = 200;
+    private int calculateRepairPerTick = 200;
     public boolean isWorking = false;
     // i hope java pass it by reference
-    private final ItemStackHandler itemHandler = new ItemStackHandler(this.items) {
+    private final ItemStackHandler itemHandler = new ItemStackHandler(items) {
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
             OvenBlockEnity.this.setChanged();
         }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate){
+            if(stack.is(Items.GOLD_INGOT)){
+                return super.insertItem(slot, stack, simulate);
+            }
+
+            return ItemStack.EMPTY;
+           
+        }
+
     };
-    private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(10000, 1000, 0);
+    private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(20000, 1000, 0);
 
     public final ContainerData containerData = new ContainerData() {
         @Override
@@ -60,9 +73,9 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
 
         @Override
         public void set(int pIndex, int pValue) {
-            FattysOven.LOGGER.debug("B" + String.valueOf(pValue));
             switch (pIndex) {
                 case 0 -> OvenBlockEnity.this.energyStorage.changeEnergy(pValue);
+                case 1 -> OvenBlockEnity.this.energyStorage.setEnerrgy(pValue);
                 case 2 -> OvenBlockEnity.this.goldStorage = pValue;
                 case 3 -> OvenBlockEnity.this.isWorking = pValue == 0 ? false : true;
             }
@@ -80,24 +93,25 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     }
 
     public void tick() {
-
-        if (this.level == null || this.level.isClientSide()) {
+        if (level == null || this.level.isClientSide()) {
             return;
         }
-        if (this.isWorking) {
+        if (isWorking) {
             boolean stillWorking = false;
             for (var i = 0; i < SIZE - 1; i++) {
-                var item = this.itemHandler.getStackInSlot(i);
+                var item = itemHandler.getStackInSlot(i);
                 if (item.isDamaged() && item.isDamageableItem()) {
-                    item.setDamageValue(item.getDamageValue() - 1);
+                    item.setDamageValue(item.getDamageValue() - calculateRepairPerTick);
                     stillWorking = item.isDamaged() ? true : stillWorking;
-                    this.goldStorage -= 50;
+                    goldStorage -= calculatedGoldPerTick;
+                    energyStorage.changeEnergy(-calculatedEnergyPerTick);
+                    FattysOven.LOGGER.debug(String.valueOf(energyStorage.getEnergyStored()));
                 }
             }
-            this.consumeGold();
-            this.goldStorage = this.goldStorage < 0 ? 0 : this.goldStorage;
-            this.isWorking = this.hasResources() && stillWorking;
-            // this.sendUpdate();
+            consumeGold();
+            goldStorage = goldStorage < 0 ? 0 : goldStorage;
+            isWorking = hasResources() && stillWorking;
+            // sendUpdate();
         }
     }
 
@@ -109,7 +123,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory) {
-        return new OvenInventory(windowId, playerInventory, this, this.containerData);
+        return new OvenInventory(windowId, playerInventory, this, containerData);
     }
 
     @Override
@@ -132,7 +146,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     }
 
     private boolean hasResources() {
-        if (goldStorage > 0 && this.energyStorage.getEnergyStored() > 0)
+        if (goldStorage > 0 && energyStorage.getEnergyStored() > 0)
             return true;
         return false;
     }
@@ -141,6 +155,7 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
     public void setChanged() {
         super.setChanged();
         consumeGold();
+        calculateStats();
         isWorking = false;
         if (!hasResources()) {
             return;
@@ -173,8 +188,8 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
 
         var tagData = new CompoundTag();
         tagData.put("oven_inventory", getInventory().serializeNBT(lookupProvider));
-        tagData.putInt("gold_storage", this.goldStorage);
-        tagData.putInt("energy", this.energyStorage.getEnergyStored());
+        tagData.putInt("gold_storage", goldStorage);
+        tagData.putInt("energy", energyStorage.getEnergyStored());
 
         tag.put("oven_data", tagData);
     }
@@ -185,25 +200,41 @@ public class OvenBlockEnity extends BaseContainerBlockEntity implements Tickable
 
         var tagData = tag.getCompound("oven_data");
 
-        this.itemHandler.deserializeNBT(lookupProvider, tagData.getCompound("oven_inventory"));
-        this.energyStorage.setEnerrgy(tagData.getInt("energy"));
-        this.goldStorage = tagData.getInt("gold_storage");
+        itemHandler.deserializeNBT(lookupProvider, tagData.getCompound("oven_inventory"));
+        energyStorage.setEnerrgy(tagData.getInt("energy"));
+        goldStorage = tagData.getInt("gold_storage");
 
     }
 
     public IEnergyStorage getEnergyStorage(Direction facing) {
-        return this.energyStorage;
+        return energyStorage;
     }
 
     private void sendUpdate() {
         FattysOven.LOGGER.debug("sendUpdate");
-        if (this.level != null) {
-            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
     }
 
     private int isWorking() {
-        return this.isWorking ? 1 : 0;
+        return isWorking ? 1 : 0;
     }
 
+    private void calculateStats() {
+        int mult = 1;
+        for (int i = 0; i < 4; i++) {
+            mult *= itemHandler.getStackInSlot(10 + i).is(FattysOven.UPGRADE_ITEM) ? 2 : 1;
+        }
+
+        calculateRepairPerTick = baseRepairPerTick * mult;
+        calculatedEnergyPerTick = baseEnergyPerTick * mult;
+        calculatedGoldPerTick = baseGoldPerTick * mult;
+        energyStorage.setCapacity(10000 * mult);
+        energyStorage.setMaxRecieve(1000 * mult);
+    }
+
+    public int getCalculatedEnergyPerTick() {
+        return calculatedEnergyPerTick;
+    }
 }

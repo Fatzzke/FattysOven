@@ -2,9 +2,6 @@ package de.fatzzke.client;
 
 import javax.annotation.Nonnull;
 
-import com.mojang.logging.LogUtils;
-
-import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
 import de.fatzzke.inventory.OvenInventory;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,7 +9,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
 
@@ -22,7 +18,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
 
     public OvenMenuScreen(OvenInventory menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 176;
+        this.imageWidth = 195;
         this.imageHeight = 166;
     }
 
@@ -30,7 +26,6 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     protected void renderBg(GuiGraphics guiGraphics, float arg1, int arg2, int arg3) {
         renderTransparentBackground(guiGraphics);
         guiGraphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-
     }
 
     @Override
@@ -39,22 +34,33 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
         renderTooltip(guiGraphics, mouseX, mouseY);
         drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 100);
         drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
-                (this.menu.data.get(0)) * 10 / this.menu.data.get(1));
+                ((this.menu.data.get(0))) * 10 / (this.menu.data.get(1) == 0 ? 10000 : this.menu.data.get(1))); // this.menu.data.get(1)
+                                                                                                                // sometimes
+                                                                                                                // seems
+                                                                                                                // to be
+                                                                                                                // 0
+                                                                                                                //WTF ist this autoformatting
+                                                                                                                
 
         drawFeudel(guiGraphics);
-        
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        guiGraphics.drawString(font, "FE/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedEnergyPerTick()), 8, 70, 0xff00ff);
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
+        count = count > 10 ? 10 : count;
         switch (type) {
             case 0:
                 for (int i = 0; i < count; i++) {
-                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 0, 7, 2);
+                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 0, 6, 2);
                 }
                 break;
             case 1:
                 for (int i = 0; i < count; i++) {
-                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 2, 7, 2);
+                    guiGraphics.blit(TEXTURE, startX, startY - (i * 2), 250, 2, 6, 2);
                 }
                 break;
             default:

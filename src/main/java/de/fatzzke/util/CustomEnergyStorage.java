@@ -5,7 +5,7 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 public class CustomEnergyStorage extends EnergyStorage {
 
     public CustomEnergyStorage(int capacity, int maxReceive, int maxExtract) {
-        super(capacity, maxReceive, maxExtract, 5000);
+        super(capacity, maxReceive, maxExtract, 0);
     }
 
     public void changeEnergy(int amount) {
@@ -23,5 +23,18 @@ public class CustomEnergyStorage extends EnergyStorage {
     public void setEnerrgy(int amount){
         this.energy = amount;
     }
+
+    public void setCapacity(int amount){
+        capacity = amount;
+        if(energy > capacity){
+            energy = capacity;
+        }
+    }
+
+    public void setMaxRecieve(int amount){
+        maxReceive = amount;
+    }
+
+    
 
 }
