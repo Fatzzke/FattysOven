@@ -19,6 +19,6 @@ public class UpgradeSticker extends Item {
     public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
             @Nonnull List<Component> tooltipComponents,
             @Nonnull TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("tooltip.fattysoven.upgradiger_sticker").withStyle(ChatFormatting.BLUE));
+        tooltipComponents.add(Component.translatable("tooltip.fattysoven.upgrade_sticker").withStyle(ChatFormatting.BLUE));
     }
 }

@@ -25,7 +25,7 @@ public class OvenInventory extends AbstractContainerMenu {
     // Client Constructor
     public OvenInventory(int containerId, Inventory playerInv, FriendlyByteBuf additionalData) {
         this(containerId, playerInv, playerInv.player.level().getBlockEntity(additionalData.readBlockPos()),
-                new SimpleContainerData(4));
+                new SimpleContainerData(5));
     }
 
     // Server Constructor

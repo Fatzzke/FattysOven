@@ -5,20 +5,21 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.block.Block;
 
-public class UpgradigerSticker extends Item {
+public class OvenBlockItem extends BlockItem {
 
-    public UpgradigerSticker(Properties properties) {
-        super(properties);
+    public OvenBlockItem(Block ovenBlock, Properties properties) {
+        super(ovenBlock, properties);
     }
 
     @Override
     public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
             @Nonnull List<Component> tooltipComponents,
             @Nonnull TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("tooltip.fattysoven.upgradiger_sticker").withStyle(ChatFormatting.BLUE));
+        tooltipComponents.add(Component.translatable("tooltip.fattysoven.oven_block").withStyle(ChatFormatting.BLUE));
     }
 }

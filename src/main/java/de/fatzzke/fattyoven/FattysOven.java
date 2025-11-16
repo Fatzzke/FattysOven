@@ -11,6 +11,7 @@ import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.inventory.OvenInventory;
 import de.fatzzke.items.EnergySticker;
 import de.fatzzke.items.GoldSticker;
+import de.fatzzke.items.OvenBlockItem;
 import de.fatzzke.items.UpgradeSticker;
 import de.fatzzke.items.UpgradigerSticker;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -76,8 +77,9 @@ public class FattysOven {
         public static final Supplier<MenuType<OvenInventory>> OVEN_INVENTORY = CONTAINERS.register("oven_inventory",
                         () -> IMenuTypeExtension.create(OvenInventory::new));
 
-        public static final DeferredItem<BlockItem> OVEN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("oven_block",
-                        OVEN_BLOCK);
+
+        public static final DeferredItem<OvenBlockItem> OVEN_BLOCK_ITEM = ITEMS.register("oven_block",
+                        () -> new OvenBlockItem(OVEN_BLOCK.get(), new Item.Properties()));                
 
         public static final Supplier<BlockEntityType<OvenBlockEnity>> OVEN_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                         "oven_block_entity",

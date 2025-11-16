@@ -47,7 +47,9 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
 
     @Override
     protected void renderLabels(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        guiGraphics.drawString(font, "FE/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedEnergyPerTick()), 8, 70, 0xff00ff);
+        guiGraphics.drawString(font, "FE/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedEnergyPerTick()), 8, 50, 0xff00ff);
+        guiGraphics.drawString(font, "GOLD/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedGoldPerTick()), 8, 60, 0xff00ff);
+        guiGraphics.drawString(font, "REPAIR/5T: " + String.valueOf(this.menu.ovenEntity.getCalculatedRepairPerTick()), 8, 70, 0xff00ff);
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
@@ -69,7 +71,8 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     }
 
     private void drawFeudel(GuiGraphics guiGraphics) {
-        if (this.menu.data.get(3) != 0) {
+           //     FattysOven.LOGGER.debug(String.valueOf(this.menu.data.get(4)));
+        if (this.menu.data.get(3) != 0 && this.menu.data.get(4) == 0) {
             if (System.currentTimeMillis() - startTime < 200) {
                 guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
             } else if (System.currentTimeMillis() - startTime < 400) {
@@ -78,6 +81,9 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
                 guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
                 startTime = System.currentTimeMillis();
             }
+        }
+        else if(this.menu.data.get(4) != 0){
+            guiGraphics.blit(TEXTURE, this.leftPos + 25, this.topPos + 10, 196, 136, 60, 60);
         }
     }
 }
