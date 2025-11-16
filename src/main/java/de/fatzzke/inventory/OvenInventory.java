@@ -1,11 +1,12 @@
 package de.fatzzke.inventory;
 
-
 import javax.annotation.Nonnull;
 
 import de.fatzzke.entities.OvenBlockEnity;
 import de.fatzzke.fattyoven.FattysOven;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -56,8 +57,8 @@ public class OvenInventory extends AbstractContainerMenu {
         if (slot != null && slot.hasItem()) {
             ItemStack stack1 = slot.getItem();
             stack = stack1.copy();
-            int pInventorySize = player.getInventory().items.size();     
-            if (index < pInventorySize ) {
+            int pInventorySize = player.getInventory().items.size();
+            if (index < pInventorySize) {
                 if (!moveItemStackTo(stack1, pInventorySize, this.slots.size(), false)) {
                     return ItemStack.EMPTY;
                 }
@@ -91,7 +92,7 @@ public class OvenInventory extends AbstractContainerMenu {
             }
         }
         addSlot(new SlotItemHandler(itemHandler, 9, 26, 38));
-        //upgrade Slots
+        // upgrade Slots
         addSlot(new SlotItemHandler(itemHandler, 10, 173, 7));
         addSlot(new SlotItemHandler(itemHandler, 11, 173, 25));
         addSlot(new SlotItemHandler(itemHandler, 12, 173, 43));
@@ -116,6 +117,14 @@ public class OvenInventory extends AbstractContainerMenu {
                     8 + (column * 18),
                     142));
         }
+    }
+
+    @Override
+    public void removed(Player player) {
+        if (player instanceof ServerPlayer sPlayer) {
+            player.level().playSound(null, ovenEntity.getBlockPos(), FattysOven.OVEN_CLOSE_SOUND.value(), SoundSource.BLOCKS);
+        }
+        super.removed(player);
     }
 
 }

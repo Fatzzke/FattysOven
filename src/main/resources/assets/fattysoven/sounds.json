@@ -2,7 +2,24 @@
     "oven_done": {
         "sounds": [
             {
-                "name": "fattysoven:oven_done"
+                "name": "fattysoven:oven_done",
+                "volume": 0.5
+            }
+        ]
+    },
+    "oven_open": {
+        "sounds": [
+            {
+                "name": "fattysoven:oven_open",
+                "volume": 1.0
+            }
+        ]
+    },
+    "oven_close": {
+        "sounds": [
+            {
+                "name": "fattysoven:oven_close",
+                "volume": 0.8
             }
         ]
     }

@@ -10,8 +10,11 @@ import de.fatzzke.util.TickableBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -112,9 +115,33 @@ public class OvenBlock extends Block implements EntityBlock {
 
         if (player instanceof ServerPlayer sPlayer) {
             sPlayer.openMenu(blockEnity, pos);
+            world.playSound(null, pos, FattysOven.OVEN_OPEN_SOUND.value(), SoundSource.BLOCKS);
         }
 
         return InteractionResult.CONSUME;
     }
 
+    @Override
+    public void onRemove(BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, BlockState newState,
+            boolean isMoving) {
+        if (state.getBlock() != newState.getBlock()) {
+            BlockEntity be = world.getBlockEntity(pos);
+            if (be instanceof OvenBlockEnity blockEnity) {
+                for (int i = 0; i < blockEnity.SIZE; i++) {
+                    ItemStack stack = blockEnity.getInventory().getStackInSlot(i);
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+                    float dX = world.random.nextFloat() * 0.8F + 0.1F;
+                    float dY = world.random.nextFloat() * 0.8F + 0.1F;
+                    float dZ = world.random.nextFloat() * 0.8F + 0.1F;
+                    ItemEntity entityItem = new ItemEntity(world, pos.getX() + dX, pos.getY() + dY, pos.getZ() + dZ,
+                            stack.copy());
+                    world.addFreshEntity(entityItem);
+
+                }
+            }
+        }
+        super.onRemove(state, world, pos, newState, isMoving);
+    }
 }

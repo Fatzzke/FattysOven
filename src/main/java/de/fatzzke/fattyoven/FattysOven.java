@@ -101,12 +101,16 @@ public class FattysOven {
         public static final DeferredItem<UpgradigerSticker> UPGRADIGER_ITEM = ITEMS.register("upgradiger_sticker",
                         () -> new UpgradigerSticker(new Item.Properties().stacksTo(1)));
 
-        // public static final Holder<SoundEvent> OVEN_TICK_SOUND = SOUND_EVENTS.register(
-        //                 "oven_tick",
-        //                 SoundEvent::createVariableRangeEvent);
+        public static final Holder<SoundEvent> OVEN_OPEN_SOUND = SOUND_EVENTS.register(
+                        "oven_open",
+                        SoundEvent::createVariableRangeEvent);
 
         public static final Holder<SoundEvent> OVEN_DONE_SOUND = SOUND_EVENTS.register(
                         "oven_done",
+                        SoundEvent::createVariableRangeEvent);
+
+        public static final Holder<SoundEvent> OVEN_CLOSE_SOUND = SOUND_EVENTS.register(
+                        "oven_close",
                         SoundEvent::createVariableRangeEvent);
 
         // Creates a creative tab with the id "fattysoven:example_tab" for the example
