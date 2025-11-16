@@ -14,9 +14,11 @@ import de.fatzzke.items.GoldSticker;
 import de.fatzzke.items.OvenBlockItem;
 import de.fatzzke.items.UpgradeSticker;
 import de.fatzzke.items.UpgradigerSticker;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -68,6 +70,9 @@ public class FattysOven {
         public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(BuiltInRegistries.MENU,
                         MODID);
 
+        public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister
+                        .create(BuiltInRegistries.SOUND_EVENT, MODID);
+
         public static final DeferredBlock<OvenBlock> OVEN_BLOCK = BLOCKS.registerBlock(
                         "oven_block",
                         OvenBlock::new, // The factory that the properties will be passed into.
@@ -77,9 +82,8 @@ public class FattysOven {
         public static final Supplier<MenuType<OvenInventory>> OVEN_INVENTORY = CONTAINERS.register("oven_inventory",
                         () -> IMenuTypeExtension.create(OvenInventory::new));
 
-
         public static final DeferredItem<OvenBlockItem> OVEN_BLOCK_ITEM = ITEMS.register("oven_block",
-                        () -> new OvenBlockItem(OVEN_BLOCK.get(), new Item.Properties()));                
+                        () -> new OvenBlockItem(OVEN_BLOCK.get(), new Item.Properties()));
 
         public static final Supplier<BlockEntityType<OvenBlockEnity>> OVEN_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                         "oven_block_entity",
@@ -96,6 +100,14 @@ public class FattysOven {
 
         public static final DeferredItem<UpgradigerSticker> UPGRADIGER_ITEM = ITEMS.register("upgradiger_sticker",
                         () -> new UpgradigerSticker(new Item.Properties().stacksTo(1)));
+
+        // public static final Holder<SoundEvent> OVEN_TICK_SOUND = SOUND_EVENTS.register(
+        //                 "oven_tick",
+        //                 SoundEvent::createVariableRangeEvent);
+
+        public static final Holder<SoundEvent> OVEN_DONE_SOUND = SOUND_EVENTS.register(
+                        "oven_done",
+                        SoundEvent::createVariableRangeEvent);
 
         // Creates a creative tab with the id "fattysoven:example_tab" for the example
         // item, that is placed after the combat tab
@@ -135,6 +147,8 @@ public class FattysOven {
                 BLOCK_ENTITY_TYPES.register(modEventBus);
 
                 CONTAINERS.register(modEventBus);
+
+                SOUND_EVENTS.register(modEventBus);
 
                 // Register ourselves for server and other game events we are interested in.
                 // Note that this is necessary if and only if we want *this* class (FattysOven)

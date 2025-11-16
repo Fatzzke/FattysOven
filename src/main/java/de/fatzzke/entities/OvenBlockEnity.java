@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -30,12 +31,11 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
     public static final int SIZE = 14;
 
-    // thanks neoforge docu for that? no other mod extends BaseContainerBlockEntity
-    // but whatever
     private int goldStorage = 0;
     private int maxgoldStorage = 10000;
-    private float baseGoldPerTick = 25;
-    private float baseEnergyPerTick = 500;
+    //how to balance this shit
+    private float baseGoldPerTick = 20;
+    private float baseEnergyPerTick = 600;
     private float baseRepairPerTick = 1;
     private int calculatedGoldPerTick = 50;
     private int calculatedEnergyPerTick = 200;
@@ -54,11 +54,11 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
         @Override
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
             // 3x3 slot
-            if (slot < 9 && !stack.is(Items.GOLD_INGOT)) {
+            if (slot < 9 && !stack.is(Items.GOLD_INGOT) && !stack.is(Items.GOLD_BLOCK)) {
                 return super.insertItem(slot, stack, simulate);
             }
             // gold slot
-            if (slot == 9 && stack.is(Items.GOLD_INGOT)) {
+            if (slot == 9 && (stack.is(Items.GOLD_INGOT) || stack.is(Items.GOLD_BLOCK))) {
                 return super.insertItem(slot, stack, simulate);
             }
             // other slots dont insert
@@ -70,7 +70,6 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     public final ContainerData containerData = new ContainerData() {
         @Override
         public int get(int pIndex) {
-            FattysOven.LOGGER.debug(String.valueOf(pIndex));
             return switch (pIndex) {
                 case 0 -> OvenBlockEnity.this.energyStorage.getEnergyStored();
                 case 1 -> OvenBlockEnity.this.energyStorage.getMaxEnergyStored();
@@ -103,6 +102,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     public void tick() {
+       // long startTime = System.nanoTime();
         if (level == null || this.level.isClientSide()) {
             return;
         }
@@ -113,7 +113,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
                 var item = itemHandler.getStackInSlot(i);
                 if (item.isDamaged() && item.isDamageableItem()) {
                     if (workTicks > 5) {
-                        item.setDamageValue(item.getDamageValue() - calculateRepairPerTick);
+                        item.setDamageValue(item.getDamageValue() - calculateRepairPerTick);    //oh no every item gets repaired for 1 repairTick even when the resources are empty anyway....
                         workTicks = 0;
                     }
                     stillWorking = item.isDamaged() ? true : stillWorking;
@@ -125,13 +125,19 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
             goldStorage = goldStorage < 0 ? 0 : goldStorage;
             waitForEnergy = energyStorage.getEnergyStored() <= getCalculatedEnergyPerTick() && stillWorking;
             isWorking = hasResources() && stillWorking;
+            if(!stillWorking){
+                FattysOven.LOGGER.debug("sound");
+                this.level.playSound(null, worldPosition, FattysOven.OVEN_DONE_SOUND.value(), SoundSource.BLOCKS);
+            }
         }
         if (waitForEnergy) {
             if (energyStorage.getEnergyStored() > calculatedEnergyPerTick) {
                 waitForEnergy = false;
-                isWorking = true;
+                isWorking = true; //oh no 1 free Tick of working anyway....
             }
         }
+   //     long stopTime = System.nanoTime();
+    //    System.out.println(stopTime - startTime);
     }
 
     public ItemStackHandler getInventory() {
@@ -209,6 +215,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
         return energyStorage;
     }
 
+    //not necessary to sync? 
     private void sendUpdate() {
         FattysOven.LOGGER.debug("sendUpdate");
         if (level != null) {
@@ -234,7 +241,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
                 goldMult *= 2;
                 storeMult *= 2;
             } else if (stack.is(FattysOven.GOLD_ITEM)) {
-                goldMult *= 4;
+                goldMult *= 2;
                 energyMult *= 0.5;
                 storeMult *= 2;
             } else if (stack.is(FattysOven.ENERGY_ITEM)) {

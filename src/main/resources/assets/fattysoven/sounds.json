@@ -1,0 +1,9 @@
+{
+    "oven_done": {
+        "sounds": [
+            {
+                "name": "fattysoven:oven_done"
+            }
+        ]
+    }
+}
