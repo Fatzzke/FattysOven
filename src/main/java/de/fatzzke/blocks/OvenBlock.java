@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -55,7 +56,7 @@ public class OvenBlock extends Block implements EntityBlock {
 
     // therese gotta be a better way
     @Override
-    public VoxelShape getShape(@Nonnull BlockState state, @Nonnull BlockGetter worldIn, @Nonnull BlockPos pos,
+    protected VoxelShape getShape(@Nonnull BlockState state, @Nonnull BlockGetter worldIn, @Nonnull BlockPos pos,
             @Nonnull CollisionContext context) {
         switch (state.getValue(HORIZONTAL_FACING)) {
             case EAST:
@@ -74,7 +75,6 @@ public class OvenBlock extends Block implements EntityBlock {
                 return OVEN_SHAPE[0];
 
         }
-
     }
 
     @Override
@@ -127,7 +127,7 @@ public class OvenBlock extends Block implements EntityBlock {
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity be = world.getBlockEntity(pos);
             if (be instanceof OvenBlockEnity blockEnity) {
-                for (int i = 0; i < blockEnity.SIZE; i++) {
+                for (int i = 0; i < OvenBlockEnity.SIZE; i++) {
                     ItemStack stack = blockEnity.getInventory().getStackInSlot(i);
                     if (stack.isEmpty()) {
                         continue;

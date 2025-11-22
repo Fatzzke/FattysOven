@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,10 +31,12 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, MenuProvider {
 
     public static final int SIZE = 14;
+    private static final int baseCapacity = 50000;
+    private static final int baseReceive = 6000;
 
     private int goldStorage = 0;
-    private int maxgoldStorage = 10000;
-    //how to balance this shit
+    private int maxgoldStorage = 20000;
+    // how to balance this shit
     private float baseGoldPerTick = 20;
     private float baseEnergyPerTick = 600;
     private float baseRepairPerTick = 1;
@@ -53,6 +56,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
         @Override
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            FattysOven.LOGGER.debug("insertItem");
             // 3x3 slot
             if (slot < 9 && !stack.is(Items.GOLD_INGOT) && !stack.is(Items.GOLD_BLOCK)) {
                 return super.insertItem(slot, stack, simulate);
@@ -65,7 +69,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
             return stack;
         }
     };
-    private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(50000, 2000, 0);
+    private final CustomEnergyStorage energyStorage = new CustomEnergyStorage(baseCapacity, baseReceive, 0);
 
     public final ContainerData containerData = new ContainerData() {
         @Override
@@ -102,42 +106,41 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     public void tick() {
-       // long startTime = System.nanoTime();
-        if (level == null || this.level.isClientSide()) {
-            return;
-        }
+        long startTime = System.nanoTime();
         if (isWorking && !waitForEnergy) {
             workTicks++;
             boolean stillWorking = false;
             for (var i = 0; i < SIZE - 1; i++) {
                 var item = itemHandler.getStackInSlot(i);
                 if (item.isDamaged() && item.isDamageableItem()) {
-                    if (workTicks > 5) {
-                        item.setDamageValue(item.getDamageValue() - calculateRepairPerTick);    //oh no every item gets repaired for 1 repairTick even when the resources are empty anyway....
-                        workTicks = 0;
+                    if (workTicks >= 6) {
+                        item.setDamageValue(item.getDamageValue() - calculateRepairPerTick);
                     }
                     stillWorking = item.isDamaged() ? true : stillWorking;
                     goldStorage -= calculatedGoldPerTick;
                     energyStorage.changeEnergy(-calculatedEnergyPerTick);
+                    if(!hasResources()){
+                        break;
+                    }
                 }
             }
             consumeGold();
+            workTicks = workTicks >= 6 ? 0 : workTicks;
             goldStorage = goldStorage < 0 ? 0 : goldStorage;
             waitForEnergy = energyStorage.getEnergyStored() <= getCalculatedEnergyPerTick() && stillWorking;
             isWorking = hasResources() && stillWorking;
-            if(!stillWorking){
-                FattysOven.LOGGER.debug("sound");
+            if (!stillWorking) {
                 this.level.playSound(null, worldPosition, FattysOven.OVEN_DONE_SOUND.value(), SoundSource.BLOCKS);
             }
         }
         if (waitForEnergy) {
             if (energyStorage.getEnergyStored() > calculatedEnergyPerTick) {
                 waitForEnergy = false;
-                isWorking = true; //oh no 1 free Tick of working anyway....
+                isWorking = hasResources();
             }
         }
-   //     long stopTime = System.nanoTime();
-    //    System.out.println(stopTime - startTime);
+        long stopTime = System.nanoTime();
+        System.out.println(stopTime - startTime);
     }
 
     public ItemStackHandler getInventory() {
@@ -175,13 +178,13 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
     protected void consumeGold() {
         var itemStack = itemHandler.getStackInSlot(9);
-        if (goldStorage <= 9000 && itemStack.is(Items.GOLD_INGOT)) {
+        if (goldStorage <= 19000 && itemStack.is(Items.GOLD_INGOT)) {
             int consumCount = (maxgoldStorage - goldStorage) / 1000;
             consumCount = consumCount > itemStack.getCount() ? itemStack.getCount() : consumCount;
             itemStack.shrink(consumCount);
             goldStorage += 1000 * consumCount;
 
-        } else if (goldStorage <= 1000 && itemStack.is(Items.GOLD_BLOCK)) {
+        } else if (goldStorage <= 10000 && itemStack.is(Items.GOLD_BLOCK)) {
             itemStack.shrink(1);
             goldStorage += 9000;
         }
@@ -215,12 +218,24 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
         return energyStorage;
     }
 
-    //not necessary to sync? 
+    // not necessary to sync?
     private void sendUpdate() {
         FattysOven.LOGGER.debug("sendUpdate");
         if (level != null) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
+    }
+
+    @Nullable
+    @Override
+    public final ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        var tag = saveWithoutMetadata(registries);
+        return tag;
     }
 
     private int isWorking() {
@@ -259,8 +274,8 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
         calculateRepairPerTick = (int) (baseRepairPerTick * repairMult);
         calculatedEnergyPerTick = (int) (baseEnergyPerTick * energyMult);
         calculatedGoldPerTick = (int) (baseGoldPerTick * goldMult);
-        energyStorage.setCapacity(10000 * (int) storeMult);
-        energyStorage.setMaxRecieve(1000 * (int) storeMult);
+        energyStorage.setCapacity(baseCapacity * (int) storeMult);
+        energyStorage.setMaxRecieve(baseReceive * (int) storeMult);
     }
 
     public int getCalculatedEnergyPerTick() {

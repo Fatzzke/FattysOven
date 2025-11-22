@@ -32,7 +32,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
-        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 1000);
+        drawBars(guiGraphics, 0, this.leftPos + 160, this.topPos + 38, this.menu.data.get(2) / 2000);
         drawBars(guiGraphics, 1, this.leftPos + 160, this.topPos + 71,
                 ((this.menu.data.get(0))) * 10 / (this.menu.data.get(1) == 0 ? 10000 : this.menu.data.get(1))); // this.menu.data.get(1)
                                                                                                                 // sometimes
@@ -49,7 +49,7 @@ public class OvenMenuScreen extends AbstractContainerScreen<OvenInventory> {
     protected void renderLabels(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         guiGraphics.drawString(font, "FE/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedEnergyPerTick()), 180, 90, 0xff00ff);
         guiGraphics.drawString(font, "GOLD/T: " + String.valueOf(this.menu.ovenEntity.getCalculatedGoldPerTick()), 180, 100, 0xff00ff);
-        guiGraphics.drawString(font, "REPAIR/5T: " + String.valueOf(this.menu.ovenEntity.getCalculatedRepairPerTick()), 180, 110, 0xff00ff);
+        guiGraphics.drawString(font, "REPAIR/6T: " + String.valueOf(this.menu.ovenEntity.getCalculatedRepairPerTick()), 180, 110, 0xff00ff);
     }
 
     private void drawBars(GuiGraphics guiGraphics, int type, int startX, int startY, int count) {
