@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import de.fatzzke.entities.OvenBlockEnity;
-import de.fatzzke.fattyoven.FattysOven;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -14,6 +13,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
+
+import javax.annotation.Nonnull;
 
 
 public class OvenBlockRenderer implements BlockEntityRenderer<OvenBlockEnity> {
@@ -25,11 +26,10 @@ public class OvenBlockRenderer implements BlockEntityRenderer<OvenBlockEnity> {
     }
 
     @Override
-    public void render(OvenBlockEnity blockEntity, float partialTick, PoseStack poseStack,
-            MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+    public void render(@Nonnull OvenBlockEnity blockEntity, float partialTick, @Nonnull PoseStack poseStack,
+            @Nonnull MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
         var renderItem = blockEntity.getInventory().getStackInSlot(0);
-      //  FattysOven.LOGGER.debug(renderItem.toString());
         if (renderItem.isEmpty()) {
             return;
         }

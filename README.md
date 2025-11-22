@@ -1,3 +1,6 @@
+Fattys Oven, Minecraft Mod
+=======
+A Mod that adds an Oven which contains a magical Cat that repairs items using Energy and Gold.
 
 Installation information
 =======

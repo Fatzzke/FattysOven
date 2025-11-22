@@ -56,7 +56,6 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
         @Override
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-            FattysOven.LOGGER.debug("insertItem");
             // 3x3 slot
             if (slot < 9 && !stack.is(Items.GOLD_INGOT) && !stack.is(Items.GOLD_BLOCK)) {
                 return super.insertItem(slot, stack, simulate);
@@ -106,7 +105,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     public void tick() {
-        long startTime = System.nanoTime();
+        // long startTime = System.nanoTime();
         if (isWorking && !waitForEnergy) {
             workTicks++;
             boolean stillWorking = false;
@@ -119,7 +118,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
                     stillWorking = item.isDamaged() ? true : stillWorking;
                     goldStorage -= calculatedGoldPerTick;
                     energyStorage.changeEnergy(-calculatedEnergyPerTick);
-                    if(!hasResources()){
+                    if (!hasResources()) {
                         break;
                     }
                 }
@@ -130,7 +129,9 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
             waitForEnergy = energyStorage.getEnergyStored() <= getCalculatedEnergyPerTick() && stillWorking;
             isWorking = hasResources() && stillWorking;
             if (!stillWorking) {
-                this.level.playSound(null, worldPosition, FattysOven.OVEN_DONE_SOUND.value(), SoundSource.BLOCKS);
+                if (this.level != null) {
+                    this.level.playSound(null, worldPosition, FattysOven.OVEN_DONE_SOUND.value(), SoundSource.BLOCKS);
+                }
             }
         }
         if (waitForEnergy) {
@@ -139,8 +140,8 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
                 isWorking = hasResources();
             }
         }
-        long stopTime = System.nanoTime();
-        System.out.println(stopTime - startTime);
+        // long stopTime = System.nanoTime();
+        // System.out.println(stopTime - startTime);
     }
 
     public ItemStackHandler getInventory() {
@@ -220,7 +221,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
 
     // not necessary to sync?
     private void sendUpdate() {
-        FattysOven.LOGGER.debug("sendUpdate");
+        // FattysOven.LOGGER.debug("sendUpdate");
         if (level != null) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
@@ -233,7 +234,7 @@ public class OvenBlockEnity extends BlockEntity implements TickableBlockEntity, 
     }
 
     @Override
-    public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    public final CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider registries) {
         var tag = saveWithoutMetadata(registries);
         return tag;
     }

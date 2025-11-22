@@ -21,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -122,7 +121,7 @@ public class OvenBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public void onRemove(BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, BlockState newState,
+    public void onRemove(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos,@Nonnull BlockState newState,
             boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity be = world.getBlockEntity(pos);

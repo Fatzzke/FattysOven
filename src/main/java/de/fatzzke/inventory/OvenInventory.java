@@ -30,7 +30,7 @@ public class OvenInventory extends AbstractContainerMenu {
     }
 
     // Server Constructor
-    public OvenInventory(int containerId, Inventory playerInv, BlockEntity blockEntity, ContainerData data) {
+    public OvenInventory(int containerId, Inventory playerInv, BlockEntity blockEntity, @Nonnull ContainerData data) {
         super(FattysOven.OVEN_INVENTORY.get(), containerId);
         if (blockEntity instanceof OvenBlockEnity be) {
             this.ovenEntity = be;
@@ -120,9 +120,9 @@ public class OvenInventory extends AbstractContainerMenu {
     }
 
     @Override
-    public void removed(Player player) {
+    public void removed(@Nonnull Player player) {
         if (player instanceof ServerPlayer sPlayer) {
-            player.level().playSound(null, ovenEntity.getBlockPos(), FattysOven.OVEN_CLOSE_SOUND.value(), SoundSource.BLOCKS);
+            sPlayer.level().playSound(null, ovenEntity.getBlockPos(), FattysOven.OVEN_CLOSE_SOUND.value(), SoundSource.BLOCKS);
         }
         super.removed(player);
     }

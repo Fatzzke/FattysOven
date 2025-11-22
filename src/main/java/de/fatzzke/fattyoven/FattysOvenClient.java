@@ -2,13 +2,11 @@ package de.fatzzke.fattyoven;
 
 import de.fatzzke.client.OvenMenuScreen;
 import de.fatzzke.client.renderer.OvenBlockRenderer;
-import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -30,12 +28,12 @@ public class FattysOvenClient {
 
     }
 
-    @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
-        FattysOven.LOGGER.info("HELLO FROM CLIENT SETUP");
-        FattysOven.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-    }
+    // @SubscribeEvent
+    // static void onClientSetup(FMLClientSetupEvent event) {
+    //     // Some client setup code
+    //     //FattysOven.LOGGER.info("HELLO FROM CLIENT SETUP");
+    //     //FattysOven.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+    // }
 
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

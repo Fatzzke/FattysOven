@@ -20,17 +20,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
@@ -40,7 +36,6 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -179,7 +174,7 @@ public class FattysOven {
 
         private void commonSetup(FMLCommonSetupEvent event) {
                 // Some common setup code
-                LOGGER.info("HELLO FROM COMMON SETUP!");
+                //LOGGER.info("HELLO FROM COMMON SETUP!");
 
         }
 
@@ -198,9 +193,9 @@ public class FattysOven {
         }
 
         // You can use SubscribeEvent and let the Event Bus discover methods to call
-        @SubscribeEvent
-        public void onServerStarting(ServerStartingEvent event) {
-                // Do something when the server starts
-                LOGGER.info("HELLO from server starting");
-        }
+        // @SubscribeEvent
+        // public void onServerStarting(ServerStartingEvent event) {
+        //         // Do something when the server starts
+        //         //LOGGER.info("HELLO from server starting");
+        // }
 }
