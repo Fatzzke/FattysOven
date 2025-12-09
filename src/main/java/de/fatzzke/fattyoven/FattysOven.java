@@ -73,7 +73,7 @@ public class FattysOven {
         public static final DeferredBlock<OvenBlock> OVEN_BLOCK = BLOCKS.registerBlock(
                         "oven_block",
                         OvenBlock::new, // The factory that the properties will be passed into.
-                        BlockBehaviour.Properties.of().noOcclusion() // The properties to use.
+                        BlockBehaviour.Properties.of().noOcclusion().destroyTime(1.0f) // The properties to use.
         );
 
         public static final Supplier<MenuType<OvenInventory>> OVEN_INVENTORY = CONTAINERS.register("oven_inventory",
